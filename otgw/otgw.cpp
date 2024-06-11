@@ -26,6 +26,7 @@ void OpenThermGateway::loop() {
 
     switch (this->state) {
         case STATE_IDLE:
+            this->check_otmessage_timeout();
             break;
         case STATE_INITIAL:
             this->state = STATE_REQUEST_VERSION;
@@ -125,7 +126,7 @@ bool OpenThermGateway::parse_command_response() {
             if (this->command_response_equals("0", 1)) {
                 ESP_LOGD(TAG, "PrintSummary succesfully set");
                 this->last_command_sent = nullptr;
-                this->state = STATE_IDLE;
+                this->go_idle();
             }
             break;
         default:
@@ -173,6 +174,10 @@ void OpenThermGateway::parse_otmessage() {
         frame = frame * 16 + hex_value;
     }
 
+    if (otgw_message_type == 'T') {
+        this->last_valid_otmessage = millis();
+    }
+
     uint8_t msg_type = (frame >> 28) & 7;
     uint8_t data_id = (frame >> 16) & 0xFF;
     uint16_t data_value = frame & 0xFFFF;
@@ -180,6 +185,19 @@ void OpenThermGateway::parse_otmessage() {
     uint8_t data_lb = data_value & 0xFF;
 
     ESP_LOGD(TAG, "Valid otmessage: %c '%08x' = %d %d %04x", otgw_message_type, frame, msg_type, data_id, data_value);
+
+    if (msg_type != 1 && msg_type != 4) { // write-data or read-ack
+        return;
+    }
+
+    switch (data_id) {
+        case 120:
+            // burner operation hours, u16
+            if (this->sensor_burner_operation_hours_ != nullptr) {
+                this->sensor_burner_operation_hours_->publish_state(data_value);
+            }
+            break;
+    }
 }
 
 void OpenThermGateway::send_command(const uint8_t* command, const uint8_t* data, size_t datalen) {
@@ -243,6 +261,18 @@ bool OpenThermGateway::command_response_equals(const char* contents, int content
         return false;
     }
     return this->command_response_startswith(contents, contentslen);
+}
+
+void OpenThermGateway::go_idle() {
+    this->state = STATE_IDLE;
+    this->last_valid_otmessage = millis();
+}
+
+void OpenThermGateway::check_otmessage_timeout() {
+    if (millis() - this->last_valid_otmessage > OTGW_OTMESSAGE_TIMEOUT_MS) {
+        ESP_LOGD(TAG, "Timeout waiting for valid otmessage from master");
+        this->state = STATE_REQUEST_PRINT_SUMMARY;
+    }
 }
 
 }  // namespace esphome

@@ -7,7 +7,7 @@ from esphome.const import CONF_ID
 
 CODEOWNERS = ["@mvdnes"]
 DEPENDENCIES = ["uart"]
-AUTO_LOAD = ["text_sensor"]
+AUTO_LOAD = ["sensor", "text_sensor"]
 
 otgw_ns = cg.esphome_ns.namespace("otgw")
 OpenThermGateway = otgw_ns.class_("OpenThermGateway", uart.UARTDevice, cg.Component)
