@@ -194,27 +194,19 @@ void OpenThermGateway::parse_otmessage() {
     switch (data_id) {
         case 18:
             // water pressure, f8.8
-            if (this->sensor_central_heating_water_pressure_ != nullptr) {
-                this->sensor_central_heating_water_pressure_->publish_state(data_f88);
-            }
+            this->sensor_central_heating_water_pressure_.publish_state(data_f88);
             break;
         case 24:
             // room temperature, f8.8
-            if (this->sensor_room_temperature_ != nullptr) {
-                this->sensor_room_temperature_->publish_state(data_f88);
-            }
+            this->sensor_room_temperature_.publish_state(data_f88);
             break;
         case 25:
             // boiler water temperature, f8.8
-            if (this->sensor_boiler_water_temperature_ != nullptr) {
-                this->sensor_boiler_water_temperature_->publish_state(data_f88);
-            }
+            this->sensor_boiler_water_temperature_.publish_state(data_f88);
             break;
         case 120:
             // burner operation hours, u16
-            if (this->sensor_burner_operation_hours_ != nullptr) {
-                this->sensor_burner_operation_hours_->publish_state(data_value);
-            }
+            this->sensor_burner_operation_hours_.publish_state(data_value);
             break;
     }
 }
@@ -290,8 +282,15 @@ void OpenThermGateway::go_idle() {
 void OpenThermGateway::check_otmessage_timeout() {
     if (millis() - this->last_valid_otmessage > OTGW_OTMESSAGE_TIMEOUT_MS) {
         ESP_LOGD(TAG, "Timeout waiting for valid otmessage from master");
-        this->state = STATE_REQUEST_PRINT_SUMMARY;
+        this->state = STATE_INITIAL;
+        this->mark_sensors_as_unknown();
     }
+}
+
+void OpenThermGateway::mark_sensors_as_unknown() {
+    sensor_room_temperature_.clear_state();
+    sensor_boiler_water_temperature_.clear_state();
+    sensor_central_heating_water_pressure_.clear_state();
 }
 
 }  // namespace esphome

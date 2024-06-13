@@ -27,4 +27,4 @@ async def to_code(config):
         id = conf[CONF_ID]
         if id and id.type == text_sensor.TextSensor:
             sens = await text_sensor.new_text_sensor(conf)
-            cg.add(getattr(var, f"set_{key}_sensor")(sens))
+            cg.add(getattr(var, f"set_sensor_{key}")(sens))
