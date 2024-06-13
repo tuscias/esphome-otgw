@@ -1,5 +1,7 @@
 #pragma once
 
+#include <vector>
+
 #include "esphome/components/uart/uart.h"
 #include "esphome/components/sensor/sensor.h"
 #include "esphome/components/text_sensor/text_sensor.h"
@@ -13,21 +15,37 @@ const int OTGW_MAX_LINE_DURATION_MS = 150;
 const int OTGW_COMMAND_RESPONSE_MAX_DURATION_MS = 5000;
 const int OTGW_OTMESSAGE_TIMEOUT_MS = 10000; // spec: 1s +/- 15%, we wait 10s
 
-class MaybeSensor {
-    public:
-        void set(sensor::Sensor* sensor) { this->sensor_ = sensor; }
-        void publish_state(float state) {
-            if (this->sensor_ != nullptr) {
-                this->sensor_->publish_state(state);
-            }
-        }
-        void clear_state() {
-            if (this->sensor_ != nullptr) {
-                this->sensor_->publish_state(std::numeric_limits<float>::quiet_NaN());
-            }
-        }
-    protected:
-        sensor::Sensor* sensor_{nullptr};
+enum class OpenThermDataType {
+    U16,
+    F88,
+};
+
+struct OpenThermMessage {
+    uint8_t msg_type;
+    uint8_t data_id;
+
+    uint16_t value_u16;
+    uint8_t value_lb;
+    uint8_t value_hb;
+    float value_f88;
+
+    OpenThermMessage(uint32_t frame) {
+        this->msg_type = (frame >> 28) & 0x7;
+        this->data_id = (frame >> 16) & 0xFF;
+        this->value_u16 = frame & 0xFFFF;
+        this->value_hb = (this->value_u16 >> 8) & 0xFF;
+        this->value_lb = this->value_u16 & 0xFF;
+        this->value_f88 = (int8_t)this->value_hb + (float)this->value_lb / 256.0;
+    }
+};
+
+struct OpenThermMessageListener {
+    uint8_t data_id;
+    std::function<void(const OpenThermMessage&)> on_otmessage;
+};
+
+struct TimeoutListener {
+    std::function<void(void)> on_timeout;
 };
 
 class OpenThermGateway : public Component, public uart::UARTDevice {
@@ -38,13 +56,25 @@ public:
     }
     void setup() override;
     void loop() override;
+    float get_setup_priority() const override { return setup_priority::DATA; }
+    // TODO: void dump_config() override;
+
+    void register_listener(
+            uint8_t data_id,
+            const std::function<void(OpenThermMessage)> &on_otmessage) {
+        OpenThermMessageListener listener;
+        listener.data_id = data_id;
+        listener.on_otmessage = on_otmessage;
+        this->listeners_.push_back(listener);
+    }
+
+    void register_timeout_listener(const std::function<void()> &on_timeout) {
+        TimeoutListener timeout_listener;
+        timeout_listener.on_timeout = on_timeout;
+        this->on_timeout_listeners_.push_back(timeout_listener);
+    }
 
     void set_sensor_version(text_sensor::TextSensor *sensor) { this->sensor_version_ = sensor; }
-
-    void set_sensor_room_temperature(sensor::Sensor *sensor) { this->sensor_room_temperature_.set(sensor); }
-    void set_sensor_boiler_water_temperature(sensor::Sensor *sensor) { this->sensor_boiler_water_temperature_.set(sensor); }
-    void set_sensor_central_heating_water_pressure(sensor::Sensor *sensor) { this->sensor_central_heating_water_pressure_.set(sensor); }
-    void set_sensor_burner_operation_hours(sensor::Sensor *sensor) { this->sensor_burner_operation_hours_.set(sensor); }
 protected:
     int buffer_pos;
     char buffer[OTGW_BUFFER_SIZE];
@@ -57,10 +87,8 @@ protected:
     uint32_t last_valid_otmessage;
 
     text_sensor::TextSensor *sensor_version_{nullptr};
-    MaybeSensor sensor_room_temperature_;
-    MaybeSensor sensor_boiler_water_temperature_;
-    MaybeSensor sensor_central_heating_water_pressure_;
-    MaybeSensor sensor_burner_operation_hours_;
+    std::vector<OpenThermMessageListener> listeners_;
+    std::vector<TimeoutListener> on_timeout_listeners_;
 
     void read_incoming_data();
     void parse_buffer();
@@ -75,7 +103,6 @@ protected:
     bool command_response_equals(const char* contents, int contentslen);
     void go_idle();
     void check_otmessage_timeout();
-    void mark_sensors_as_unknown();
 };
 
 }

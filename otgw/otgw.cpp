@@ -178,36 +178,16 @@ void OpenThermGateway::parse_otmessage() {
         this->last_valid_otmessage = millis();
     }
 
-    uint8_t msg_type = (frame >> 28) & 7;
-    uint8_t data_id = (frame >> 16) & 0xFF;
-    uint16_t data_value = frame & 0xFFFF;
-    uint8_t data_hb = (data_value >> 8) & 0xFF;
-    uint8_t data_lb = data_value & 0xFF;
-    float data_f88 = (int8_t)data_hb + (float)data_lb / 256.0;
+    OpenThermMessage otmessage(frame);
 
-    ESP_LOGD(TAG, "Valid otmessage: %c '%08x' = %d %d %04x", otgw_message_type, frame, msg_type, data_id, data_value);
-
-    if (msg_type != 1 && msg_type != 4) { // write-data or read-ack
+    if (otmessage.msg_type != 1 && otmessage.msg_type != 4) { // write-data or read-ack
         return;
     }
 
-    switch (data_id) {
-        case 18:
-            // water pressure, f8.8
-            this->sensor_central_heating_water_pressure_.publish_state(data_f88);
-            break;
-        case 24:
-            // room temperature, f8.8
-            this->sensor_room_temperature_.publish_state(data_f88);
-            break;
-        case 25:
-            // boiler water temperature, f8.8
-            this->sensor_boiler_water_temperature_.publish_state(data_f88);
-            break;
-        case 120:
-            // burner operation hours, u16
-            this->sensor_burner_operation_hours_.publish_state(data_value);
-            break;
+    for (auto &listener : this->listeners_) {
+        if (listener.data_id == otmessage.data_id) {
+            listener.on_otmessage(otmessage);
+        }
     }
 }
 
@@ -283,14 +263,10 @@ void OpenThermGateway::check_otmessage_timeout() {
     if (millis() - this->last_valid_otmessage > OTGW_OTMESSAGE_TIMEOUT_MS) {
         ESP_LOGD(TAG, "Timeout waiting for valid otmessage from master");
         this->state = STATE_INITIAL;
-        this->mark_sensors_as_unknown();
+        for (auto &listener: this->on_timeout_listeners_) {
+            listener.on_timeout();
+        }
     }
-}
-
-void OpenThermGateway::mark_sensors_as_unknown() {
-    sensor_room_temperature_.clear_state();
-    sensor_boiler_water_temperature_.clear_state();
-    sensor_central_heating_water_pressure_.clear_state();
 }
 
 }  // namespace esphome

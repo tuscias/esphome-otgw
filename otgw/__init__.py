@@ -12,6 +12,8 @@ AUTO_LOAD = ["sensor", "text_sensor"]
 otgw_ns = cg.esphome_ns.namespace("otgw")
 OpenThermGateway = otgw_ns.class_("OpenThermGateway", uart.UARTDevice, cg.Component)
 
+CONF_OTGW_ID = "otgw_id"
+
 CONFIG_SCHEMA = (
     cv.Schema(
         {
