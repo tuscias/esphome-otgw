@@ -183,6 +183,7 @@ void OpenThermGateway::parse_otmessage() {
     uint16_t data_value = frame & 0xFFFF;
     uint8_t data_hb = (data_value >> 8) & 0xFF;
     uint8_t data_lb = data_value & 0xFF;
+    float data_f88 = (int8_t)data_hb + (float)data_lb / 256.0;
 
     ESP_LOGD(TAG, "Valid otmessage: %c '%08x' = %d %d %04x", otgw_message_type, frame, msg_type, data_id, data_value);
 
@@ -191,6 +192,24 @@ void OpenThermGateway::parse_otmessage() {
     }
 
     switch (data_id) {
+        case 18:
+            // water pressure, f8.8
+            if (this->sensor_central_heating_water_pressure_ != nullptr) {
+                this->sensor_central_heating_water_pressure_->publish_state(data_f88);
+            }
+            break;
+        case 24:
+            // room temperature, f8.8
+            if (this->sensor_room_temperature_ != nullptr) {
+                this->sensor_room_temperature_->publish_state(data_f88);
+            }
+            break;
+        case 25:
+            // boiler water temperature, f8.8
+            if (this->sensor_boiler_water_temperature_ != nullptr) {
+                this->sensor_boiler_water_temperature_->publish_state(data_f88);
+            }
+            break;
         case 120:
             // burner operation hours, u16
             if (this->sensor_burner_operation_hours_ != nullptr) {

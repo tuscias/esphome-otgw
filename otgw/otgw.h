@@ -23,6 +23,9 @@ public:
     void loop() override;
 
     void set_version_sensor(text_sensor::TextSensor *sensor) { this->sensor_version_ = sensor; }
+    void set_sensor_room_temperature(sensor::Sensor *sensor) { this->sensor_room_temperature_ = sensor; }
+    void set_sensor_boiler_water_temperature(sensor::Sensor *sensor) { this->sensor_boiler_water_temperature_ = sensor; }
+    void set_sensor_central_heating_water_pressure(sensor::Sensor *sensor) { this->sensor_central_heating_water_pressure_ = sensor; }
     void set_sensor_burner_operation_hours(sensor::Sensor *sensor) { this->sensor_burner_operation_hours_ = sensor; }
 protected:
     int buffer_pos;
@@ -36,6 +39,9 @@ protected:
     uint32_t last_valid_otmessage;
 
     text_sensor::TextSensor *sensor_version_{nullptr};
+    sensor::Sensor *sensor_room_temperature_{nullptr};
+    sensor::Sensor *sensor_boiler_water_temperature_{nullptr};
+    sensor::Sensor *sensor_central_heating_water_pressure_{nullptr};
     sensor::Sensor *sensor_burner_operation_hours_{nullptr};
 
     void read_incoming_data();
