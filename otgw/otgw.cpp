@@ -69,7 +69,7 @@ void OpenThermGateway::read_incoming_data() {
         else {
             if (c == '\r') {
                 // carriage-return marks end of line
-                ESP_LOGD(TAG, "Read line: '%.*s'", this->buffer_pos, this->buffer);
+                ESP_LOGVV(TAG, "Read line: '%.*s'", this->buffer_pos, this->buffer);
                 this->parse_buffer();
                 this->buffer_pos = 0;
             }
