@@ -14,6 +14,7 @@ const int OTGW_BUFFER_INVALID = -1;
 const int OTGW_MAX_LINE_DURATION_MS = 150;
 const int OTGW_COMMAND_RESPONSE_MAX_DURATION_MS = 5000;
 const int OTGW_OTMESSAGE_TIMEOUT_MS = 10000; // spec: 1s +/- 15%, we wait 10s
+const int OTGW_TARGET_TEMPERATURE_MAX_TRIES = 5;
 
 enum class OpenThermDataType {
     U16,
@@ -75,6 +76,8 @@ public:
     }
 
     void set_sensor_version(text_sensor::TextSensor *sensor) { this->sensor_version_ = sensor; }
+
+    void set_room_temperature(float temperature, bool constant);
 protected:
     int buffer_pos;
     char buffer[OTGW_BUFFER_SIZE];
@@ -85,6 +88,9 @@ protected:
     uint32_t command_request_start_time;
 
     uint32_t last_valid_otmessage;
+
+    float target_temperature_;
+    int target_temperature_tries_;
 
     text_sensor::TextSensor *sensor_version_{nullptr};
     std::vector<OpenThermMessageListener> listeners_;
@@ -99,6 +105,7 @@ protected:
     bool response_is_from_last_command();
     void request_version();
     void set_printsummary();
+    void send_request_target_temperature(bool constant);
     bool command_response_startswith(const char* startstring, int startstringlen);
     bool command_response_equals(const char* contents, int contentslen);
     void go_idle();
