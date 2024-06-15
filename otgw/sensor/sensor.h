@@ -10,7 +10,7 @@ namespace otgw {
 class OpenThermGatewaySensor : public sensor::Sensor, public Component {
     public:
         void setup() override;
-        // TODO: void dump_config() override;
+        void dump_config() override;
         void set_parent(OpenThermGateway *parent) { this->parent_ = parent; }
         void set_data_id(uint8_t data_id) { this->data_id_ = data_id; };
         void set_data_type(OpenThermDataType data_type) { this->data_type_ = data_type; }

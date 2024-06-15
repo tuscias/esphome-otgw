@@ -18,6 +18,10 @@ void OpenThermGatewaySensor::setup() {
     }
 }
 
+void OpenThermGatewaySensor::dump_config() {
+    LOG_SENSOR("", "OpenThermGatewaySensor", this);
+}
+
 void OpenThermGatewaySensor::on_otmessage(const OpenThermMessage &message) {
     float value = NaN;
     switch (this->data_type_) {

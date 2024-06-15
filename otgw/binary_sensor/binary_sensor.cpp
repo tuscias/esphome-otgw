@@ -17,6 +17,10 @@ void OpenThermGatewayBinarySensor::setup() {
     }
 }
 
+void OpenThermGatewayBinarySensor::dump_config() {
+    LOG_BINARY_SENSOR("", "OpenTherm Gateway Binary Sensor", this);
+}
+
 void OpenThermGatewayBinarySensor::on_otmessage(const OpenThermMessage &message) {
     bool value = (message.value_u16 >> this->flag_bit_) & 1;
     this->publish_state(value);

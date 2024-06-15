@@ -58,7 +58,7 @@ public:
     void setup() override;
     void loop() override;
     float get_setup_priority() const override { return setup_priority::DATA; }
-    // TODO: void dump_config() override;
+    void dump_config() override;
 
     void register_listener(
             uint8_t data_id,

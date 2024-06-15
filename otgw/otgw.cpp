@@ -23,6 +23,13 @@ static const int STATE_REQUEST_PRINT_SUMMARY = 20;
 static const int STATE_REQUEST_TARGET_TEMPERATURE_TEMPORARY = 30;
 static const int STATE_REQUEST_TARGET_TEMPERATURE_CONSTANT = 31;
 
+void OpenThermGateway::dump_config() {
+    ESP_LOGCONFIG(TAG, "OpenThermGateway");
+    if (this->sensor_version_ != nullptr) {
+        LOG_TEXT_SENSOR("  ", "OpenThermGateway Text Sensor", this->sensor_version_);
+    }
+}
+
 void OpenThermGateway::setup() {
     // Ensure any garbage is cleared by sending a newline
     this->write_byte('\r');

@@ -10,7 +10,7 @@ namespace otgw {
 class OpenThermGatewayClimateThermostat : public climate::Climate, public Component {
     public:
         void setup() override;
-        // TODO: void dump_config() override;
+        void dump_config() override;
         climate::ClimateTraits traits() override;
         void control(const climate::ClimateCall& call) override;
 

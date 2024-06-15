@@ -22,6 +22,16 @@ void OpenThermGatewayClimateThermostat::setup() {
     this->parent_->register_timeout_listener([this]() { this->on_timeout(); });
 }
 
+void OpenThermGatewayClimateThermostat::dump_config() {
+    LOG_CLIMATE("", "OpenTherm Gateway Climate", this);
+    if (this->target_temperature_constant_) {
+        ESP_LOGCONFIG(TAG, "  Target Temperature is set Constant");
+    }
+    else {
+        ESP_LOGCONFIG(TAG, "  Target Temperature is set Temporary");
+    }
+}
+
 void OpenThermGatewayClimateThermostat::control(const climate::ClimateCall& call) {
     if (call.get_target_temperature().has_value()) {
         this->target_temperature = *call.get_target_temperature();

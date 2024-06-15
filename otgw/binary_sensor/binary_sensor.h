@@ -10,7 +10,7 @@ namespace otgw {
 class OpenThermGatewayBinarySensor : public binary_sensor::BinarySensor, public Component {
     public:
         void setup() override;
-        // TODO: void dump_config() override;
+        void dump_config() override;
         void set_parent(OpenThermGateway *parent) { this->parent_ = parent; }
         void set_data_id(uint8_t data_id) { this->data_id_ = data_id; }
         void set_flag_bit(uint8_t flag_bit) { this->flag_bit_ = flag_bit; }
