@@ -85,7 +85,7 @@ void OpenThermGateway::read_incoming_data() {
                 }
                 else if (millis() - this->buffer_start_time > OTGW_MAX_LINE_DURATION_MS) {
                     this->buffer_pos = OTGW_BUFFER_INVALID;
-                    ESP_LOGD(TAG, "Current line took too long.");
+                    ESP_LOGW(TAG, "Current line took too long.");
                 }
             }
             else {
@@ -117,7 +117,7 @@ bool OpenThermGateway::parse_command_response() {
     }
 
     if (!this->response_is_from_last_command()) {
-        ESP_LOGD(TAG, "Response to command '%.2s' was unexpected", this->buffer);
+        ESP_LOGW(TAG, "Response to command '%.2s' was unexpected", this->buffer);
         return true;
     }
 
@@ -127,7 +127,7 @@ bool OpenThermGateway::parse_command_response() {
                 const char* versionstart = &this->buffer[4 + 2];
                 int versionlen = this->buffer_pos - 4 - 2;
                 std::string version_str(versionstart, versionlen);
-                ESP_LOGD(TAG, "Got version: '%s'", version_str.c_str());
+                ESP_LOGI(TAG, "Got version: '%s'", version_str.c_str());
                 if (version_str.size() > 0 && this->sensor_version_ != nullptr) {
                     this->sensor_version_->publish_state(version_str);
                 }
@@ -137,14 +137,14 @@ bool OpenThermGateway::parse_command_response() {
             break;
         case STATE_REQUEST_PRINT_SUMMARY:
             if (this->command_response_equals("0", 1)) {
-                ESP_LOGD(TAG, "PrintSummary succesfully set");
+                ESP_LOGI(TAG, "PrintSummary succesfully set");
                 this->last_command_sent = nullptr;
                 this->go_idle();
             }
             break;
         case STATE_REQUEST_TARGET_TEMPERATURE_CONSTANT:
         case STATE_REQUEST_TARGET_TEMPERATURE_TEMPORARY:
-            ESP_LOGD(TAG, "Temperature set");
+            ESP_LOGI(TAG, "Temperature set");
             this->last_command_sent = nullptr;
             this->go_idle();
             break;
@@ -231,7 +231,7 @@ bool OpenThermGateway::should_send_command() {
         return true;
     }
     else if (millis() - this->command_request_start_time > OTGW_COMMAND_RESPONSE_MAX_DURATION_MS) {
-        ESP_LOGD(TAG, "Timeout waiting for command response");
+        ESP_LOGW(TAG, "Timeout waiting for command response to %.2s", this->last_command_sent);
         return true;
     }
     return false;
@@ -304,7 +304,7 @@ void OpenThermGateway::go_idle() {
 
 void OpenThermGateway::check_otmessage_timeout() {
     if (millis() - this->last_valid_otmessage > OTGW_OTMESSAGE_TIMEOUT_MS) {
-        ESP_LOGD(TAG, "Timeout waiting for valid otmessage from master");
+        ESP_LOGW(TAG, "Timeout waiting for valid otmessage from master, resetting state.");
         this->state = STATE_INITIAL;
         for (auto &listener: this->on_timeout_listeners_) {
             listener.on_timeout();

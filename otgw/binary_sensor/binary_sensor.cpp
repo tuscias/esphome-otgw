@@ -3,7 +3,7 @@
 namespace esphome {
 namespace otgw {
 
-static const char *const TAG = "otgw_binary_sensor";
+static const char *const TAG = "otgw.binary_sensor";
 
 
 void OpenThermGatewayBinarySensor::setup() {

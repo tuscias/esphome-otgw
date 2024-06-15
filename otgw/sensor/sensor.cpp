@@ -3,7 +3,7 @@
 namespace esphome {
 namespace otgw {
 
-static const char *const TAG = "otgw_sensor";
+static const char *const TAG = "otgw.sensor";
 
 static const float NaN = std::numeric_limits<float>::quiet_NaN();
 
