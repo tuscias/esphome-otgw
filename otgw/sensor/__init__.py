@@ -52,7 +52,7 @@ CONFIG_SCHEMA = cv.Schema({
     cv.Optional(SENSOR_ROOM_SETPOINT): sensor.sensor_schema(
         OpenThermGatewaySensor,
         unit_of_measurement=UNIT_CELSIUS,
-        accuracy_decimals=2,
+        accuracy_decimals=1,
         device_class=DEVICE_CLASS_TEMPERATURE,
     ),
     cv.Optional(SENSOR_ROOM_TEMPERATURE): sensor.sensor_schema(
