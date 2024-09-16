@@ -9,6 +9,9 @@ For other sensors, only a subset of OTGW messages are parsed. New sensors can be
 ## Example Configuration
 
 ```yaml
+external_components:
+  - source: github://mvdnes/esphome-otgw
+
 uart:
   # Serial for OTGW PIC
   - id: uart_otgw
