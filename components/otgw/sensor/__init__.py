@@ -40,14 +40,14 @@ class OpenThermGatewaySensorConfig:
 
 SENSOR_CONFIG = {
     SENSOR_CONTROL_SETPOINT: OpenThermGatewaySensorConfig(1, "F88"),
+    SENSOR_MAX_RELATIVE_MODULATION_LEVEL: OpenThermGatewaySensorConfig(14, "F88"),
     SENSOR_ROOM_SETPOINT: OpenThermGatewaySensorConfig(16, "F88"),
+    SENSOR_RELATIVE_MODULATION_LEVEL: OpenThermGatewaySensorConfig(17, "F88"),
     SENSOR_CENTRAL_HEATING_WATER_PRESSURE: OpenThermGatewaySensorConfig(18, "F88"),
     SENSOR_ROOM_TEMPERATURE: OpenThermGatewaySensorConfig(24, "F88"),
     SENSOR_BOILER_WATER_TEMPERATURE: OpenThermGatewaySensorConfig(25, "F88"),
     SENSOR_BURNER_STARTS: OpenThermGatewaySensorConfig(116, "U16", clear_on_timeout=False),
     SENSOR_BURNER_OPERATION_HOURS: OpenThermGatewaySensorConfig(120, "U16", clear_on_timeout=False),
-    SENSOR_MAX_RELATIVE_MODULATION_LEVEL: OpenThermGatewaySensorConfig(14, "F88"),
-    SENSOR_RELATIVE_MODULATION_LEVEL: OpenThermGatewaySensorConfig(17, "F88"),
 }
 
 
@@ -62,13 +62,13 @@ CONFIG_SCHEMA = cv.Schema({
     ),
     cv.Optional(SENSOR_MAX_RELATIVE_MODULATION_LEVEL): sensor.sensor_schema(
         OpenThermGatewaySensor,
-        unit_of_measurement='%',
+        unit_of_measurement=UNIT_PERCENT,
         accuracy_decimals=2,
         state_class=STATE_CLASS_MEASUREMENT,
     ),
     cv.Optional(SENSOR_RELATIVE_MODULATION_LEVEL): sensor.sensor_schema(
         OpenThermGatewaySensor,
-        unit_of_measurement='%',
+        unit_of_measurement=UNIT_PERCENT,
         accuracy_decimals=2,
         state_class=STATE_CLASS_MEASUREMENT,
     ),
