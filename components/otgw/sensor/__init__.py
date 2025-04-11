@@ -46,8 +46,6 @@ SENSOR_CONFIG = {
     SENSOR_BOILER_WATER_TEMPERATURE: OpenThermGatewaySensorConfig(25, "F88"),
     SENSOR_BURNER_STARTS: OpenThermGatewaySensorConfig(116, "U16", clear_on_timeout=False),
     SENSOR_BURNER_OPERATION_HOURS: OpenThermGatewaySensorConfig(120, "U16", clear_on_timeout=False),
-    SENSOR_CONTROL_SETPOINT: OpenThermGatewaySensorConfig(1, "F88"),
-    SENSOR_ROOM_SETPOINT: OpenThermGatewaySensorConfig(16, "F88"),
     SENSOR_MAX_RELATIVE_MODULATION_LEVEL: OpenThermGatewaySensorConfig(14, "F88"),
     SENSOR_RELATIVE_MODULATION_LEVEL: OpenThermGatewaySensorConfig(17, "F88"),
 }
