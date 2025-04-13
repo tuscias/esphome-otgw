@@ -32,6 +32,8 @@ climate:
 
 sensor:
   - platform: otgw
+    control_setpoint:
+      name: Control Setpoint
     room_setpoint:
       name: Room Setpoint
     central_heating_water_pressure:
@@ -44,6 +46,10 @@ sensor:
       name: Burner Operation Hours
     burner_starts:
       name: Burner Starts
+    max_relative_modulation_level:
+      name: Max Relative Modulation Level
+    relative_modulation_level:
+      name: Relative Modulation Level
 
 binary_sensor:
   - platform: otgw

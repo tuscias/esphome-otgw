@@ -10,6 +10,7 @@ from esphome.const import (
     UNIT_CELSIUS,
     UNIT_EMPTY,
     UNIT_HOUR,
+    UNIT_PERCENT,
     STATE_CLASS_TOTAL_INCREASING,
     STATE_CLASS_MEASUREMENT,
 )
@@ -29,7 +30,8 @@ SENSOR_ROOM_TEMPERATURE = "room_temperature"
 SENSOR_BOILER_WATER_TEMPERATURE = "boiler_water_temperature"
 SENSOR_BURNER_STARTS = "burner_starts"
 SENSOR_BURNER_OPERATION_HOURS = "burner_operation_hours"
-
+SENSOR_MAX_RELATIVE_MODULATION_LEVEL = "max_relative_modulation_level"
+SENSOR_RELATIVE_MODULATION_LEVEL = "relative_modulation_level"
 
 @dataclass
 class OpenThermGatewaySensorConfig:
@@ -39,7 +41,9 @@ class OpenThermGatewaySensorConfig:
 
 SENSOR_CONFIG = {
     SENSOR_CONTROL_SETPOINT: OpenThermGatewaySensorConfig(1, "F88"),
+    SENSOR_MAX_RELATIVE_MODULATION_LEVEL: OpenThermGatewaySensorConfig(14, "F88"),
     SENSOR_ROOM_SETPOINT: OpenThermGatewaySensorConfig(16, "F88"),
+    SENSOR_RELATIVE_MODULATION_LEVEL: OpenThermGatewaySensorConfig(17, "F88"),
     SENSOR_CENTRAL_HEATING_WATER_PRESSURE: OpenThermGatewaySensorConfig(18, "F88"),
     SENSOR_ROOM_TEMPERATURE: OpenThermGatewaySensorConfig(24, "F88"),
     SENSOR_BOILER_WATER_TEMPERATURE: OpenThermGatewaySensorConfig(25, "F88"),
@@ -55,6 +59,18 @@ CONFIG_SCHEMA = cv.Schema({
         unit_of_measurement=UNIT_CELSIUS,
         accuracy_decimals=1,
         device_class=DEVICE_CLASS_TEMPERATURE,
+        state_class=STATE_CLASS_MEASUREMENT,
+    ),
+    cv.Optional(SENSOR_MAX_RELATIVE_MODULATION_LEVEL): sensor.sensor_schema(
+        OpenThermGatewaySensor,
+        unit_of_measurement=UNIT_PERCENT,
+        accuracy_decimals=2,
+        state_class=STATE_CLASS_MEASUREMENT,
+    ),
+    cv.Optional(SENSOR_RELATIVE_MODULATION_LEVEL): sensor.sensor_schema(
+        OpenThermGatewaySensor,
+        unit_of_measurement=UNIT_PERCENT,
+        accuracy_decimals=2,
         state_class=STATE_CLASS_MEASUREMENT,
     ),
     cv.Optional(SENSOR_ROOM_SETPOINT): sensor.sensor_schema(
