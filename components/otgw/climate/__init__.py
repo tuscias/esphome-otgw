@@ -23,7 +23,7 @@ CONF_TARGET_TEMPERATURE_CONSTANT = "target_temperature_constant"
 CONFIG_SCHEMA = cv.Schema({
     cv.GenerateID(CONF_OTGW_ID): cv.use_id(OpenThermGateway),
 
-    cv.Optional(SENSOR_ROOM_THERMOSTAT): climate.CLIMATE_SCHEMA.extend({
+    cv.Optional(SENSOR_ROOM_THERMOSTAT): climate.climate_schema(OpenThermGatewayClimateThermostat).extend({
         cv.GenerateID(): cv.declare_id(OpenThermGatewayClimateThermostat),
         cv.Optional(CONF_TARGET_TEMPERATURE_CONSTANT, default=False): cv.boolean,
     }),
