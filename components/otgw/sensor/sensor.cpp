@@ -31,6 +31,9 @@ void OpenThermGatewaySensor::on_otmessage(const OpenThermMessage &message) {
         case OpenThermDataType::F88:
             value = message.value_f88;
             break;
+        case OpenThermDataType::S16:
+            value = static_cast<int16_t>(message.value_u16);
+            break;
     }
     this->publish_state(value);
 }
