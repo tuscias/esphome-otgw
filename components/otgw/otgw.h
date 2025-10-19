@@ -19,6 +19,7 @@ const int OTGW_TARGET_TEMPERATURE_MAX_TRIES = 5;
 enum class OpenThermDataType {
     U16,
     F88,
+    S16
 };
 
 struct OpenThermMessage {
