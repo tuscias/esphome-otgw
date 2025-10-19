@@ -32,24 +32,150 @@ climate:
 
 sensor:
   - platform: otgw
-    control_setpoint:
-      name: Control Setpoint
-    room_setpoint:
-      name: Room Setpoint
-    central_heating_water_pressure:
-      name: Central Heating Water Pressure
-    room_temperature:
-      name: Room Temperature
-    boiler_water_temperature:
-      name: Boiler Water Temperature
-    burner_operation_hours:
-      name: Burner Operation Hours
-    burner_starts:
-      name: Burner Starts
-    max_relative_modulation_level:
-      name: Max Relative Modulation Level
-    relative_modulation_level:
+    status:
+      name: Master and Slave status
+    slave_config_member_id_code:
+      name: Slave Config / Member ID
+    asf_flags:
+      name: Application-specific fault
+    rbp_flags:
+      name: Remote-parameter flags
+    tr_override:
+      name: Remote override room setpoint
+    tsp:
+      name: Number of TSPs
+    fhb_size:
+      name: Size of Fault-History-Buffer supported by slave
+    fhb_index_value:
+      name: Index number / Value of referred-to fault-history buffer entry
+    max_capacity_min_mod_level:
+      name: Maximum boiler capacity (kW) / Minimum boiler modulation level(%)
+    rel_mod_level:
       name: Relative Modulation Level
+    ch_pressure:
+      name: CH water pressure
+    dhw_flow_rate:
+      name: DHW flow rate
+    t_boiler:
+      name: Boiler water temperature
+    t_dhw:
+      name: DHW temperature
+    t_outside:
+      name: Outside temperature
+    t_return:
+      name: Return water temperature
+    t_solar_storage:
+      name: Solar storage temperature
+    t_solar_collector:
+      name: Solar collector temperature
+    t_flow_ch2:
+      name: Flow water temperature CH2
+    t_dhw2:
+      name: DHW2 temperature
+    t_exhaust:
+      name: Exhaust temperature
+    t_heat_exchanger:
+      name: Boiler heat exchanger temperature
+    fan_speed:
+      name: Boiler fan speed and setpoint
+    flame_current:
+      name: Electrical current through burner flame
+    t_room_ch2:
+      name: Room temperature for 2nd CH circuit
+    relative_humidity:
+      name: Relative Humidity
+    t_dhw_set_bounds:
+      name: DHW setpoint upper & lower bounds for adjustment
+    max_t_set_bounds:
+      name: Max CH water setpoint upper & lower bounds for adjustment
+    hc_ratio_bounds:
+      name: OTC heat curve ratio upper & lower bounds for adjustment
+    remote_param4_bounds:
+      name: Remote parameter 4 boundaries
+    remote_param5_bounds:
+      name: Remote parameter 5 boundaries
+    remote_param6_bounds:
+      name: Remote parameter 6 boundaries
+    remote_param7_bounds:
+      name: Remote parameter 7 boundaries
+    remote_param8_bounds:
+      name: Remote parameter 8 boundaries
+    status_vh:
+      name: Status Ventilation/Heat recovery
+    asf_fault_code_vh:
+      name: Application-specific Fault Flags/Code V/H
+    diagnostic_code_vh:
+      name: Diagnostic code V/H
+    config_member_id_vh:
+      name: Config/Member ID V/H
+    opentherm_version_vh:
+      name: OpenTherm version V/H
+    version_type_vh:
+      name: Product version & type V/H
+    relative_ventilation:
+      name: Relative ventilation
+    supply_inlet_temperature:
+      name: Supply inlet temperature
+    supply_outlet_temperature:
+      name: Supply outlet temperature
+    exhaust_inlet_temperature:
+      name: Exhaust inlet temperature
+    exhaust_outlet_temperature:
+      name: Exhaust outlet temperature
+    exhaust_fan_speed:
+      name: Actual exhaust fan speed
+    supply_fan_speed:
+      name: Actual supply fan speed
+    remote_parameter_setting_vh:
+      name: Remote Parameter Setting V/H
+    tsp_number_vh:
+      name: TSP Number V/H
+    fault_buffer_size_vh:
+      name: Fault Buffer Size V/H
+    fault_buffer_entry_vh:
+      name: Fault Buffer Entry V/H
+    rf_strength_battery_level:
+      name: RF strength and battery level
+    operating_mode_hc1_hc2_dhw:
+      name: Operating Mode HC1, HC2/ DHW
+    room_remote_override_function:
+      name: Function of manual and program changes in master and remote room setpoint.
+    solar_storage_master:
+      name: Solar Storage Master mode
+    solar_storage_asf_flags:
+      name: Solar Storage Application-specific flags and OEM fault
+    solar_storage_slave_config_member_id_code:
+      name: Solar Storage Slave Config / Member ID
+    solar_storage_version_type:
+      name: Solar Storage product version number and type
+    solar_storage_tsp:
+      name: Solar Storage Number of Transparent-Slave-Parameters supported
+    solar_storage_fhb_size:
+      name: Solar Storage Size of Fault-History-Buffer supported by slave
+    solar_storage_fhb_index_value:
+      name: Solar Storage Index number / Value of referred-to fault-history buffer entry
+    electricity_producer_starts:
+      name: Electricity producer starts
+    electricity_producer_hours:
+      name: Electricity producer hours
+    electricity_production:
+      name: Electricity production
+    cumulative_electricity_production:
+      name: Cumulative Electricity production
+    oem_diagnostic_code:
+      name: OEM-specific diagnostic/service code
+    opentherm_version_master:
+      name: Master Version OpenTherm Protocol Specification
+    opentherm_version_slave:
+      name: Slave Version OpenTherm Protocol Specification
+    master_version:
+      name: Master product version number and type
+    slave_version:
+      name: Slave product version number and type
+    remeha_service_message:
+      name: Remeha Servicemessage
+    remeha_detection_connected_scu:
+      name: Remeha detection connected SCU’s
 
 binary_sensor:
   - platform: otgw
