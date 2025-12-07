@@ -15,6 +15,9 @@ CONFIG_SCHEMA = cv.Schema({
     cv.Optional("version"): text_sensor.text_sensor_schema(
         entity_category=ENTITY_CATEGORY_DIAGNOSTIC,
     ),
+    cv.Optional("command_response"): text_sensor.text_sensor_schema(
+        entity_category=ENTITY_CATEGORY_DIAGNOSTIC,
+    ),
 })
 
 async def to_code(config):
