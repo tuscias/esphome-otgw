@@ -82,8 +82,8 @@ void OpenThermGatewayClimateThermostat::on_timeout() {
 
 climate::ClimateTraits OpenThermGatewayClimateThermostat::traits() {
     auto traits = climate::ClimateTraits();
-    traits.set_supports_action(true);
-    traits.set_supports_current_temperature(true);
+    traits.add_feature_flags(esphome::climate::CLIMATE_SUPPORTS_ACTION);
+    traits.add_feature_flags(esphome::climate::CLIMATE_SUPPORTS_CURRENT_TEMPERATURE);
     traits.set_supported_modes({});
 
     traits.set_visual_min_temperature(1);

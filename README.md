@@ -9,6 +9,21 @@ For other sensors, only a subset of OTGW messages are parsed. New sensors can be
 ## Example Configuration
 
 ```yaml
+api:
+  # Allows a user to use the .send_command action from Home Assistant
+  #  command: string with the two-letter command
+  #  data: command data
+  #  will be sent to the PIC as '{command}={data}'
+  actions:
+    - action: send_command
+      variables:
+        command: string
+        data: string
+      then:
+        - otgw.send_command:
+            command: !lambda 'return command;'
+            data: !lambda 'return data;'
+
 external_components:
   - source: github://mvdnes/esphome-otgw
 
@@ -192,6 +207,8 @@ text_sensor:
   - platform: otgw
     version:
       name: OTGW version
+    command_response:
+      name: Command response
 ```
 
 Optional additional configuration to ensure a reset of the OTGW PIC when ESPHome is reloaded:

@@ -8,7 +8,6 @@ namespace otgw {
 
 static const char *const TAG = "otgw";
 
-static const size_t OTGW_COMMAND_SIZE = 2;
 static const uint8_t OTGW_COMMAND_PRINT_REPORT[] = "PR";
 static const uint8_t OTGW_COMMAND_PRINT_SUMMARY[] = "PS";
 static const uint8_t OTGW_COMMAND_TARGET_TEMPERATURE_TEMPORARY[] = "TT";
@@ -22,6 +21,7 @@ static const int STATE_REQUEST_VERSION = 10;
 static const int STATE_REQUEST_PRINT_SUMMARY = 20;
 static const int STATE_REQUEST_TARGET_TEMPERATURE_TEMPORARY = 30;
 static const int STATE_REQUEST_TARGET_TEMPERATURE_CONSTANT = 31;
+static const int STATE_SEND_CUSTOM_COMMAND = 40;
 
 void OpenThermGateway::dump_config() {
     ESP_LOGCONFIG(TAG, "OpenThermGateway");
@@ -56,6 +56,9 @@ void OpenThermGateway::loop() {
             break;
         case STATE_REQUEST_TARGET_TEMPERATURE_CONSTANT:
             this->send_request_target_temperature(true);
+            break;
+        case STATE_SEND_CUSTOM_COMMAND:
+            this->send_custom_command();
             break;
         default:
             ESP_LOGE(TAG, "State machine was in illegal state %d! Resetting to initial state.", this->state);
@@ -138,21 +141,30 @@ bool OpenThermGateway::parse_command_response() {
                 if (version_str.size() > 0 && this->sensor_version_ != nullptr) {
                     this->sensor_version_->publish_state(version_str);
                 }
-                this->last_command_sent = nullptr;
+                this->last_command_sent[0] = 0;
                 this->state = STATE_REQUEST_PRINT_SUMMARY;
             }
             break;
         case STATE_REQUEST_PRINT_SUMMARY:
             if (this->command_response_equals("0", 1)) {
                 ESP_LOGI(TAG, "PrintSummary succesfully set");
-                this->last_command_sent = nullptr;
+                this->last_command_sent[0] = 0;
                 this->go_idle();
             }
             break;
         case STATE_REQUEST_TARGET_TEMPERATURE_CONSTANT:
         case STATE_REQUEST_TARGET_TEMPERATURE_TEMPORARY:
             ESP_LOGI(TAG, "Temperature set");
-            this->last_command_sent = nullptr;
+            this->last_command_sent[0] = 0;
+            this->go_idle();
+            break;
+        case STATE_SEND_CUSTOM_COMMAND:
+            ESP_LOGI(TAG, "Command response: '%.*s'", this->buffer_pos, this->buffer);
+            if (this->sensor_command_response_ != nullptr) {
+                std::string response(this->buffer, this->buffer_pos);
+                this->sensor_command_response_->publish_state(response);
+            }
+            this->last_command_sent[0] = 0;
             this->go_idle();
             break;
         default:
@@ -217,6 +229,25 @@ void OpenThermGateway::parse_otmessage() {
     }
 }
 
+void OpenThermGateway::send_command(const std::string command, const std::string data) {
+    if (command.size() != OTGW_COMMAND_SIZE) {
+        ESP_LOGW(TAG, "Invalid command size, should be %d", OTGW_COMMAND_SIZE);
+        return;
+    }
+    if (data.size() <= 0) {
+        ESP_LOGW(TAG, "Cannot send empty data");
+        return;
+    }
+    if (this->state != STATE_IDLE) {
+        ESP_LOGW(TAG, "Cannot send command, busy");
+        return;
+    }
+
+    this->state = STATE_SEND_CUSTOM_COMMAND;
+    memcpy(this->custom_command, command.data(), 2);
+    this->custom_data = data;
+}
+
 void OpenThermGateway::send_command(const uint8_t* command, const uint8_t* data, size_t datalen) {
     // Send the command over serial
     this->write_array(command, OTGW_COMMAND_SIZE);
@@ -226,7 +257,7 @@ void OpenThermGateway::send_command(const uint8_t* command, const uint8_t* data,
     ESP_LOGD(TAG, "Sent command %.2s=%.*s", command, datalen, data);
 
     // Setup the command parser
-    this->last_command_sent = command;
+    memcpy(this->last_command_sent, command, OTGW_COMMAND_SIZE);
     this->command_request_start_time = millis();
 }
 
@@ -234,7 +265,7 @@ bool OpenThermGateway::should_send_command() {
     // Send a command if:
     //   - It has never been sent, indicated by last_command_sent == nullptr
     //   - The command has timed out
-    if (this->last_command_sent == nullptr) {
+    if (this->last_command_sent[0] == 0) {
         return true;
     }
     else if (millis() - this->command_request_start_time > OTGW_COMMAND_RESPONSE_MAX_DURATION_MS) {
@@ -245,7 +276,7 @@ bool OpenThermGateway::should_send_command() {
 }
 
 bool OpenThermGateway::response_is_from_last_command() {
-    if (this->last_command_sent == nullptr) return false;
+    if (this->last_command_sent[0] == 0) return false;
     return this->buffer[0] == this->last_command_sent[0] && this->buffer[1] == this->last_command_sent[1];
 }
 
@@ -265,7 +296,7 @@ void OpenThermGateway::send_request_target_temperature(bool constant) {
     if (this->should_send_command()) {
         if (this->target_temperature_tries_ == OTGW_TARGET_TEMPERATURE_MAX_TRIES) {
             ESP_LOGW(TAG, "Maximum number of tries exceeded for setting target temperature. Aborting.");
-            this->last_command_sent = nullptr;
+            this->last_command_sent[0] = 0;
             this->go_idle();
         }
         else {
@@ -281,6 +312,19 @@ void OpenThermGateway::send_request_target_temperature(bool constant) {
             ss << std::fixed << std::setprecision(2) << this->target_temperature_;
             std::string mystring = ss.str();
             this->send_command(command, (uint8_t*)mystring.c_str(), mystring.size());
+        }
+    }
+}
+
+void OpenThermGateway::send_custom_command() {
+    if (this->should_send_command()) {
+        if (this->custom_command[0] == 0) {
+            this->last_command_sent[0] = 0;
+            this->go_idle();
+        }
+        else {
+            this->send_command(this->custom_command, (const uint8_t*)this->custom_data.data(), this->custom_data.size());
+            this->custom_command[0] = 0;  // only attempt a single try
         }
     }
 }

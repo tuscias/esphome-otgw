@@ -9,6 +9,7 @@
 namespace esphome {
 namespace otgw {
 
+const size_t OTGW_COMMAND_SIZE = 2;
 const int OTGW_BUFFER_SIZE = 128;
 const int OTGW_BUFFER_INVALID = -1;
 const int OTGW_MAX_LINE_DURATION_MS = 150;
@@ -55,6 +56,8 @@ public:
     OpenThermGateway() {
         this->buffer_pos = 0;
         this->state = 0;
+        this->last_command_sent[0] = 0;
+        this->custom_command[0] = 0;
     }
     void setup() override;
     void loop() override;
@@ -77,15 +80,18 @@ public:
     }
 
     void set_sensor_version(text_sensor::TextSensor *sensor) { this->sensor_version_ = sensor; }
+    void set_sensor_command_response(text_sensor::TextSensor *sensor) { this->sensor_command_response_ = sensor; }
 
     void set_room_temperature(float temperature, bool constant);
+
+    void send_command(const std::string command, const std::string data);
 protected:
     int buffer_pos;
     char buffer[OTGW_BUFFER_SIZE];
     uint32_t buffer_start_time;
 
     int state;
-    const uint8_t* last_command_sent{nullptr};
+    uint8_t last_command_sent[OTGW_COMMAND_SIZE];
     uint32_t command_request_start_time;
 
     uint32_t last_valid_otmessage;
@@ -93,7 +99,11 @@ protected:
     float target_temperature_;
     int target_temperature_tries_;
 
+    uint8_t custom_command[OTGW_COMMAND_SIZE];
+    std::string custom_data;
+
     text_sensor::TextSensor *sensor_version_{nullptr};
+    text_sensor::TextSensor *sensor_command_response_{nullptr};
     std::vector<OpenThermMessageListener> listeners_;
     std::vector<TimeoutListener> on_timeout_listeners_;
 
@@ -107,6 +117,7 @@ protected:
     void request_version();
     void set_printsummary();
     void send_request_target_temperature(bool constant);
+    void send_custom_command();
     bool command_response_startswith(const char* startstring, int startstringlen);
     bool command_response_equals(const char* contents, int contentslen);
     void go_idle();
