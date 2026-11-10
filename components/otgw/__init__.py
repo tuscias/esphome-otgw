@@ -43,6 +43,7 @@ OPENTHERMGATEWAY_ACTION_SCHEMA = (
     "otgw.send_command",
     OpenThermGatewaySendCommandAction,
     OPENTHERMGATEWAY_ACTION_SCHEMA,
+    synchronous=True,
 )
 async def openthermgateway_send_command_action_to_code(config, action_id, template_arg, args):
     paren = await cg.get_variable(config[CONF_ID])
